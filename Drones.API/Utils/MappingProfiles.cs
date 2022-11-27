@@ -18,8 +18,7 @@ namespace Drones.API.Utils
                 .ForMember(d => d.Estado, opts => opts.MapFrom(source => source.Estado))
                 .ForMember(d => d.NumeroSerie, opts => opts.MapFrom(source => source.NumeroSerie))
                 .ForMember(d => d.PesoLimite, opts => opts.MapFrom(source => source.PesoLimite))
-                .ForMember(d => d.CapacidadBateria, opts => opts.MapFrom(source => source.CapacidadBateria))
-                .ForMember(d => d.Medicamentos, opts => opts.MapFrom(source => source.Medicamentos));
+                .ForMember(d => d.CapacidadBateria, opts => opts.MapFrom(source => source.CapacidadBateria));
 
             CreateMap<Dron, DronResponse>();
             CreateMap<Medicamento, MedicamentoResponse>();

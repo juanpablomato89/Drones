@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Drones.Common.Request.Dron;
+using Drones.Common.Request.Medicamento;
 using Drones.Common.Response;
 using Drones.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -41,6 +42,23 @@ namespace Drones.API.Controllers
            var dronesResult =  await _dronesServices.Create(addDrones);
             var result = _mapper.Map<DronResponse>(dronesResult);
             return Created("OK", result);
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> DeleteAsync(string id)
+        {
+            var result = await _dronesServices.Remove(id);
+            return Ok(result);
+        }
+
+        [HttpPut("cargar-dron/{numeroserie}")]
+        [ProducesResponseType(typeof(DronResponse), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> CargarDronAsync([FromRoute]string numeroserie, [FromBody]AddMedecamentoRequest medicamento)
+        {
+            var result = await _dronesServices.CargarDronAsync(numeroserie, medicamento );
+            var dronResult = _mapper.Map<DronResponse>(result);
+            return Ok(dronResult);
         }
     }
 }

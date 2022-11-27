@@ -13,7 +13,7 @@ namespace Drones.Data.Entities
     {
         public Dron()
         {
-            Medicamentos = new HashSet<Medicamento>();
+            Medicamentos = new List<Medicamento>();
         }
 
         [BsonId]
@@ -24,7 +24,7 @@ namespace Drones.Data.Entities
         public decimal PesoLimite { get; set; }
         public int CapacidadBateria { get; set; }
         public EstadoEnum Estado { get; set; }
-        public ICollection<Medicamento> Medicamentos { get; set; }
+        public List<Medicamento> Medicamentos { get; set; }
 
     }
 }
