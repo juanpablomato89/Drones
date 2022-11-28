@@ -60,5 +60,41 @@ namespace Drones.API.Controllers
             var dronResult = _mapper.Map<DronResponse>(result);
             return Ok(dronResult);
         }
+
+        [HttpGet("drons-avaiable")]
+        [ProducesResponseType(typeof(List<DronResponse>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> CargarDronAsync()
+        {
+            var result = await _dronesServices.GetDronsAvaiableAsync();
+            var dronResult = _mapper.Map<List<DronResponse>>(result);
+            return Ok(dronResult);
+        }
+
+        [HttpGet("batery-level/{numeroSerie}")]
+        [ProducesResponseType(typeof(int), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetBateryLevelAsync([FromRoute]string numeroSerie)
+        {
+            var result = await _dronesServices.GetBateryLevelAsync(numeroSerie);
+
+            if (result == -1)
+            {
+                return BadRequest("El Dron No existe");
+            }
+
+            return Ok(result);
+        }
+
+        [HttpGet("load-Weightl/{numeroSerie}")]
+        [ProducesResponseType(typeof(decimal), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetLoadWeightlAsync([FromRoute] string numeroSerie)
+        {
+            var result = await _dronesServices.GetLoadWeightlAsync(numeroSerie);
+            if (result == -1)
+            {
+                return BadRequest("El Dron No existe");
+            }
+
+            return Ok(result);
+        }
     }
 }

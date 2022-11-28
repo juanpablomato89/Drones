@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Drones.Common.Request.Medicamento;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Drones.Common.Request.Dron
 {
@@ -15,7 +16,7 @@ namespace Drones.Common.Request.Dron
 
         [Required(ErrorMessage = "El numero de serie es requerido")]
         [DataType(DataType.Text)]
-        [StringLength(100, ErrorMessage = "El numero de serie no puede exceder los 100 caracteres")]
+        [MaxLength(100, ErrorMessage = "El numero de serie no puede exceder los 100 caracteres")]
         [Display(Name = "Numero de Serie")]
         public string NumeroSerie { get; set; }
 

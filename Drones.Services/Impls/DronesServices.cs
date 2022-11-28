@@ -35,8 +35,8 @@ namespace Drones.Services.Impls
            var drones = await _DronesServices.Find(dron => true).ToListAsync();
             return drones;
         }
-        public async Task<Dron> GetByNumerSerie(string numeroSerie) =>
-            await _DronesServices.Find(d => d.NumeroSerie == numeroSerie).FirstOrDefaultAsync();
+        public async Task<Dron> GetByNumerSerieAsync(string numeroSerie) =>
+            await _DronesServices.Find(d => d.NumeroSerie.Equals(numeroSerie)).FirstOrDefaultAsync();
 
         public async Task<Dron> GetDronByIdAsync(string id) =>
             await _DronesServices.Find(d => d.Id == id).FirstOrDefaultAsync();
@@ -44,6 +44,10 @@ namespace Drones.Services.Impls
 
         public async Task<Dron> Create(AddDronRequest AddDron)
         {
+            var dronExist = await GetByNumerSerieAsync(AddDron.NumeroSerie);
+
+            if (dronExist != null) throw new Exception("Ya existe un dron con ese numero de serie");
+
             var dron = _mapper.Map<Dron>(AddDron);
             await _DronesServices.InsertOneAsync(dron);
             return dron;
@@ -74,7 +78,7 @@ namespace Drones.Services.Impls
             if (!MetodosAuxiliares.ValidateString(numeroSerie))
                 throw new Exception("EL numero de serie es incorrecto");
 
-            var dron = await GetByNumerSerie(numeroSerie);
+            var dron = await GetByNumerSerieAsync(numeroSerie);
 
             if (dron is null)
             {
@@ -92,6 +96,7 @@ namespace Drones.Services.Impls
             {
                 var medicamentoResult = _mapper.Map<Medicamento>(medicamento);
                 UpdateDefinition<Dron> update = Builders<Dron>.Update
+                    .Set(d => d.Estado, EstadoEnum.CARGADO)
                     .Push(u => u.Medicamentos, medicamentoResult);
                 await UpdateMedicamentos(dron.Id, update);
             }
@@ -100,7 +105,63 @@ namespace Drones.Services.Impls
                 throw new Exception("El Dron no esta listo para cargar nuevos medicamentos");
             }
 
-            return await GetByNumerSerie(numeroSerie);
+            return await GetByNumerSerieAsync(numeroSerie);
+        }
+
+        public async Task<List<Dron>> GetDronsAvaiableAsync()
+        {
+            var drons = await _DronesServices.Find(d => d.CapacidadBateria > 25 && d.Estado == EstadoEnum.CARGANDO).ToListAsync();
+
+            return drons;
+        }
+
+        public async Task<int> GetBateryLevelAsync(string numeroSerie)
+        {
+            var data = _DronesServices.Aggregate();
+            var a1 =
+                data.Project(
+                    x =>
+                    new
+                    {
+                        id = x.Id,
+                        bateryLevel = x.CapacidadBateria,
+                        IsTrue = x.NumeroSerie.ToLower().Equals(numeroSerie.ToLower().Trim())
+                    }
+                    );
+            var a2 = a1.Match(x => x.IsTrue);
+            var result = await a2.FirstOrDefaultAsync();
+
+            if (result != null)
+            {
+                return result.bateryLevel;
+            }
+
+            return -1;            
+        }
+
+        public async Task<decimal> GetLoadWeightlAsync(string numeroSerie)
+        {
+            var data = _DronesServices.Aggregate();
+            var a1 =
+                data.Project(
+                    x =>
+                    new
+                    {
+                        Id = x.Id,
+                        Medicamentos = x.Medicamentos,
+                        IsTrue = x.Medicamentos.Any()
+                    }
+                    ); ;
+            var a2 = a1.Match(x => x.IsTrue);
+            var result = await a2.FirstOrDefaultAsync();
+
+            if (result != null)
+            {
+                var weightTotal = result.Medicamentos.Sum(d => d.Peso);
+                return weightTotal;
+            }
+
+            return -1;
         }
     }
 }
